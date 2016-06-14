@@ -7,6 +7,8 @@ public class GOL_CAModel : MonoBehaviour {
 	public int cellsDimensionY;
 	public int seed;
 	[Range(0.01f, 0.99f)] public float percentLiving;
+	public string survivalString;
+	public string birthString;
 	public float timeInterval;
 
 	private bool[,] cells;
@@ -24,8 +26,6 @@ public class GOL_CAModel : MonoBehaviour {
 	void Update () {
 	
 	}
-
-
 
 	private void GenerateRandomState(int seed){
 		Random.seed = seed;
@@ -53,24 +53,29 @@ public class GOL_CAModel : MonoBehaviour {
 
 				bool selectedCell = cellsCopy[i, j];
 
-				//underpopulation rule
-				if(livingCount < 2 && selectedCell){
-					cells[i, j] = false;
+				cells[i, j] = ApplyRules(selectedCell, livingCount);
+			}
+		}
+	}
+
+	private bool ApplyRules(bool selectedCellState, int livingCount){
+		bool newCellState = false;
+
+		if(selectedCellState){
+			for(int i = 0; i < survivalString.Length; i++){
+				if(livingCount == (int)char.GetNumericValue(survivalString[i])){
+					newCellState = true;
 				}
-				//survival
-				else if((livingCount == 2 || livingCount == 3) && selectedCell){
-					cells[i, j] = true;
-				}
-				//overpopulation rule
-				else if(livingCount > 3 && selectedCell){
-					cells[i, j] = false;
-				}
-				//birth rule
-				else if(livingCount == 3 && !selectedCell){
-					cells[i, j] = true;
+			}
+		}else{
+			for(int i = 0; i < birthString.Length; i++){
+				if(livingCount == (int)char.GetNumericValue(birthString[i])){
+					newCellState = true;
 				}
 			}
 		}
+
+		return newCellState;
 	}
 
 	//uses Moore neighborhood
