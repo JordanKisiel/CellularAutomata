@@ -9,6 +9,9 @@ public class GOL_CAModel : MonoBehaviour {
 	[Range(0.01f, 0.99f)] public float percentLiving;
 	public string survivalString;
 	public string birthString;
+	//set the following values to 1 to remove probalistic behavior
+	[Range(0.0f, 1.0f)] public float survivalChance;
+	[Range(0.0f, 1.0f)] public float birthChance;
 	public float timeInterval;
 
 	private bool[,] cells;
@@ -61,15 +64,16 @@ public class GOL_CAModel : MonoBehaviour {
 	private bool ApplyRules(bool selectedCellState, int livingCount){
 		bool newCellState = false;
 
+		//survival
 		if(selectedCellState){
 			for(int i = 0; i < survivalString.Length; i++){
-				if(livingCount == (int)char.GetNumericValue(survivalString[i])){
+				if(livingCount == (int)char.GetNumericValue(survivalString[i]) && Random.value <= survivalChance){
 					newCellState = true;
 				}
 			}
-		}else{
+		}else{ //birth
 			for(int i = 0; i < birthString.Length; i++){
-				if(livingCount == (int)char.GetNumericValue(birthString[i])){
+				if(livingCount == (int)char.GetNumericValue(birthString[i]) && Random.value <= birthChance){
 					newCellState = true;
 				}
 			}
