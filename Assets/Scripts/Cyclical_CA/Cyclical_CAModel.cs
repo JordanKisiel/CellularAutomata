@@ -8,6 +8,7 @@ public class Cyclical_CAModel : MonoBehaviour {
 	public int cellsDimensionY;
 	public int seed;
 	public int numberOfValues;
+	[Range(1, 8)]public int neighborThreshold;
 	public float timeInterval;
 
 	private int[,] cells;
@@ -58,8 +59,14 @@ public class Cyclical_CAModel : MonoBehaviour {
 			successorValue = selectedCell + 1;
 		}
 
+		int successorCount = 0;
+
 		for(int i = 0; i < neighbors.Length; i++){
 			if(neighbors[i] == successorValue){
+				successorCount += 1;
+			}
+
+			if(successorCount >= neighborThreshold){
 				return successorValue;
 			}
 		}
