@@ -56,3 +56,6 @@ ProjectSettings/TagManager.asset
 ProjectSettings/TimeManager.asset
 ProjectSettings/UnityAdsSettings.asset
 ProjectSettings/UnityConnectSettings.asset
+*.meta
+*.prefab
+*.png
