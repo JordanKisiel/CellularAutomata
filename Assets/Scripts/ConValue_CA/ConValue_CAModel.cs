@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System;
 
 public class ConValue_CAModel : MonoBehaviour {
 
@@ -7,6 +8,7 @@ public class ConValue_CAModel : MonoBehaviour {
 	public int cellsDimensionY;
 	public int seed;
 	[Range(0.0f, 1.0f)]public float addingConstant;
+	[Range(0, 7)]public int precision;
 	public float timeInterval;
 
 	private float[,] cells;
@@ -15,7 +17,7 @@ public class ConValue_CAModel : MonoBehaviour {
 	void Start () {
 		cells = new float[cellsDimensionX, cellsDimensionY];
 
-		Random.seed = seed;
+		UnityEngine.Random.seed = seed;
 		GenerateRandomState();
 
 		InvokeRepeating("GenerateNextTimeStep", 0, timeInterval);
@@ -29,7 +31,7 @@ public class ConValue_CAModel : MonoBehaviour {
 	private void GenerateRandomState(){
 		for(int i = 0; i < cellsDimensionX; i++){
 			for(int j = 0; j < cellsDimensionY; j++){
-				cells[i, j] = Random.value;
+				cells[i, j] = UnityEngine.Random.value;
 			}
 		}
 	}
@@ -59,7 +61,9 @@ public class ConValue_CAModel : MonoBehaviour {
 
 		double sum = average + addingConstant;
 
-		return (float)(sum - System.Math.Truncate(sum));
+		float fractionalPortion = (float)(sum - System.Math.Truncate(sum));
+
+		return (float)System.Math.Round(fractionalPortion, precision);
 	}
 
 	//uses Moore neighborhood
