@@ -7,8 +7,6 @@ public class ConValue_CAModel : MonoBehaviour {
 	public int cellsDimensionX;
 	public int cellsDimensionY;
 	public int seed;
-	public enum FunctionType {SumAndTruncate, Dyadic, Tent, Custom};
-	public FunctionType functionType;
 	[Range(0.0f, 1.0f)]public float addingConstant;
 	[Range(0, 7)]public int precision;
 	public float timeInterval;
@@ -61,53 +59,11 @@ public class ConValue_CAModel : MonoBehaviour {
 
 		average = average / 9.0f;
 
-		float value = 0;
-
-		if(functionType == FunctionType.SumAndTruncate){
-			value = SumAndTruncate(average);
-		}else if(functionType == FunctionType.Dyadic){
-			value = Dyadic(average);
-		}else if(functionType == FunctionType.Tent){
-			value = Tent(average);
-		}else if(functionType == FunctionType.Custom){
-			value = Custom(average);
-		}
-
-		return (float)System.Math.Round(value, precision);
-	}
-
-	private float SumAndTruncate(float average){
 		double sum = average + addingConstant;
 
 		float fractionalPortion = (float)(sum - System.Math.Truncate(sum));
 
-		return fractionalPortion;
-	}
-
-	private float Dyadic(float average){
-		if(average <= 0.5){
-			return 2 * average;
-		}
-
-		return 2 * average - 1.0f;
-	}
-
-	private float Tent(float average){
-		if(average <= 0.5){
-			return 2 * average;
-		}
-
-		return 2 * (1 - average);
-	}
-
-	private float Custom(float average){
-		if(average <= 0.33){
-			return SumAndTruncate(average);
-		}else if(average > 0.33 && average <= 0.67){
-			return 2 * average - 1.0f;
-		}
-
-		return 2 * (1 - average);
+		return (float)System.Math.Round(fractionalPortion, precision);
 	}
 
 	//uses Moore neighborhood
