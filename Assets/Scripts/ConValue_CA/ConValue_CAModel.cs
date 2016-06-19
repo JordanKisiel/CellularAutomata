@@ -7,6 +7,7 @@ public class ConValue_CAModel : MonoBehaviour {
 	public int cellsDimensionX;
 	public int cellsDimensionY;
 	public int seed;
+	public bool useExtendedNeighborhood;
 	[Range(0.0f, 1.0f)]public float addingConstant;
 	[Range(0, 7)]public int precision;
 	public float timeInterval;
@@ -41,15 +42,19 @@ public class ConValue_CAModel : MonoBehaviour {
 
 		for(int i = 0; i < cellsDimensionX; i++){
 			for(int j = 0; j < cellsDimensionY; j++){
-				float[] neighbors = GetCellNeighbors(i, j, cellsCopy);
+				Vector2[] neighbors = GetCellNeighborCoord(i, j);
+
+				float[] neighborValues = GetCellNeighborValues(neighbors, cellsCopy);
 
 				float selectedCell = cellsCopy[i, j];
 
-				cells[i, j] = ApplyRules(selectedCell, neighbors);
+				cells[i, j] = ApplyRules(selectedCell, neighborValues);
 			}
 		}
 	}
 
+
+	//TODO: try out linear equations to make sure they can produce interesting results
 	private float ApplyRules(float selectedCell, float[] neighbors){
 		float average = selectedCell;
 
@@ -67,82 +72,130 @@ public class ConValue_CAModel : MonoBehaviour {
 	}
 
 	//uses Moore neighborhood
-	private float[] GetCellNeighbors(int xCoord, int yCoord, float[,] cells){
-		float[] cellNeighbors = new float[8];
+	private Vector2[] GetCellNeighborCoord(int xCoord, int yCoord){
+		Vector2[] cellNeighborCoord;
+
+		if(useExtendedNeighborhood){
+			cellNeighborCoord = new Vector2[24];
+		}else{
+			cellNeighborCoord = new Vector2[8];
+		}
+
 
 		//west cell
-		if(xCoord != 0){
-			cellNeighbors[0] = cells[xCoord - 1, yCoord];
-		}else{
-			cellNeighbors[0] = cells[cellsDimensionX - 1, yCoord];
-		}
+		cellNeighborCoord[0] = new Vector2(xCoord - 1, yCoord);
 
 		//east cell
-		if(xCoord != cellsDimensionX - 1){
-			cellNeighbors[1] = cells[xCoord + 1, yCoord];
-		}else{
-			cellNeighbors[1] = cells[0, yCoord];
-		}
+		cellNeighborCoord[1] = new Vector2(xCoord + 1, yCoord);
 
 		//north cell
-		if(yCoord != 0){
-			cellNeighbors[2] = cells[xCoord, yCoord - 1];
-		}else{
-			cellNeighbors[2] = cells[xCoord, cellsDimensionY - 1];
-		}
+		cellNeighborCoord[2] = new Vector2(xCoord, yCoord - 1);
 
 		//south cell
-		if(yCoord != cellsDimensionY - 1){
-			cellNeighbors[3] = cells[xCoord, yCoord + 1];
-		}else{
-			cellNeighbors[3] = cells[xCoord, 0];
-		}
+		cellNeighborCoord[3] = new Vector2(xCoord, yCoord + 1);
 
 		//northwest cell
-		if(xCoord != 0 && yCoord != 0){
-			cellNeighbors[4] = cells[xCoord - 1, yCoord - 1];
-		}else if(xCoord != 0){
-			cellNeighbors[4] = cells[xCoord - 1, cellsDimensionY - 1];
-		}else if(yCoord != 0){
-			cellNeighbors[4] = cells[cellsDimensionX - 1, yCoord - 1];
-		}else{
-			cellNeighbors[4] = cells[cellsDimensionX - 1, cellsDimensionY - 1];
-		}
+		cellNeighborCoord[4] = new Vector2(xCoord - 1, yCoord - 1);
 
 		//northeast cell
-		if(xCoord != cellsDimensionX - 1 && yCoord != 0){
-			cellNeighbors[5] = cells[xCoord + 1, yCoord - 1];
-		}else if(xCoord != cellsDimensionX - 1){
-			cellNeighbors[5] = cells[xCoord + 1, cellsDimensionY - 1];
-		}else if(yCoord != 0){
-			cellNeighbors[5] = cells[0, yCoord - 1];
-		}else{
-			cellNeighbors[5] = cells[0, cellsDimensionY - 1];
-		}
+		cellNeighborCoord[5] = new Vector2(xCoord + 1, yCoord - 1);
 
 		//southeast cell
-		if(xCoord != cellsDimensionX - 1 && yCoord != cellsDimensionY - 1){
-			cellNeighbors[6] = cells[xCoord + 1, yCoord + 1];
-		}else if(xCoord != cellsDimensionX - 1){
-			cellNeighbors[6] = cells[xCoord + 1, 0];
-		}else if(yCoord != cellsDimensionY - 1){
-			cellNeighbors[6] = cells[0, yCoord + 1];
-		}else{
-			cellNeighbors[6] = cells[0, 0];
-		}
+		cellNeighborCoord[6] = new Vector2(xCoord + 1, yCoord + 1);
 
 		//southwest cell
-		if(xCoord != 0 && yCoord != cellsDimensionY - 1){
-			cellNeighbors[7] = cells[xCoord - 1, yCoord + 1];
-		}else if(xCoord != 0){
-			cellNeighbors[7] = cells[xCoord - 1, 0];
-		}else if(yCoord != cellsDimensionY - 1){
-			cellNeighbors[7] = cells[cellsDimensionX - 1, yCoord + 1];
-		}else{
-			cellNeighbors[7] = cells[cellsDimensionX - 1, 0];
+		cellNeighborCoord[7] = new Vector2(xCoord - 1, yCoord + 1);
+
+		if(useExtendedNeighborhood){
+			
+			cellNeighborCoord[8] = new Vector2(xCoord - 2, yCoord - 2);
+
+			//east east cell
+			cellNeighborCoord[9] = new Vector2(xCoord - 1, yCoord - 2);
+
+			//north north cell
+			cellNeighborCoord[10] = new Vector2(xCoord, yCoord - 2);
+
+			//south south cell
+			cellNeighborCoord[11] = new Vector2(xCoord + 1, yCoord - 2);
+
+			//northwest northwest cell
+			cellNeighborCoord[12] = new Vector2(xCoord + 2, yCoord - 2);
+
+			//northeast northeast cell
+			cellNeighborCoord[13] = new Vector2(xCoord - 2, yCoord - 1);
+
+			//southeast southeast cell
+			cellNeighborCoord[14] = new Vector2(xCoord + 2, yCoord - 1);
+
+			//southwest southwest cell
+			cellNeighborCoord[15] = new Vector2(xCoord - 2, yCoord);
+
+			//west northwest cell
+			cellNeighborCoord[16] = new Vector2(xCoord + 2, yCoord);
+
+			//east northeast cell
+			cellNeighborCoord[17] = new Vector2(xCoord - 2, yCoord + 1);
+
+			//north northwest cell
+			cellNeighborCoord[18] = new Vector2(xCoord + 2, yCoord + 1);
+
+			//south southwest cell
+			cellNeighborCoord[19] = new Vector2(xCoord - 2, yCoord + 2);
+
+			//northwest northwest cell
+			cellNeighborCoord[20] = new Vector2(xCoord - 1, yCoord + 2);
+
+			//northeast northeast cell
+			cellNeighborCoord[21] = new Vector2(xCoord, yCoord + 2);
+
+			//southeast southeast cell
+			cellNeighborCoord[22] = new Vector2(xCoord + 1, yCoord + 2);
+
+			//southwest southwest cell
+			cellNeighborCoord[23] = new Vector2(xCoord + 2, yCoord + 2);
 		}
 
-		return cellNeighbors;
+		//wrap cell coordinates to create toroidal space
+		for(int i = 0; i < cellNeighborCoord.Length; i++){
+
+			if(cellNeighborCoord[i].x == -1){
+				cellNeighborCoord[i] = new Vector2(cellsDimensionX - 1, cellNeighborCoord[i].y);
+			}
+			if(cellNeighborCoord[i].y == -1){
+				cellNeighborCoord[i] = new Vector2(cellNeighborCoord[i].x, cellsDimensionY - 1);
+			}
+			if(cellNeighborCoord[i].x == -2){
+				cellNeighborCoord[i] = new Vector2(cellsDimensionX - 2, cellNeighborCoord[i].y);
+			}
+			if(cellNeighborCoord[i].y == -2){
+				cellNeighborCoord[i] = new Vector2(cellNeighborCoord[i].x, cellsDimensionY - 2);
+			}
+			if(cellNeighborCoord[i].x == cellsDimensionX){
+				cellNeighborCoord[i] = new Vector2(0, cellNeighborCoord[i].y);
+			}
+			if(cellNeighborCoord[i].y == cellsDimensionY){
+				cellNeighborCoord[i] = new Vector2(cellNeighborCoord[i].x, 0);
+			}
+			if(cellNeighborCoord[i].x == cellsDimensionX + 1){
+				cellNeighborCoord[i] = new Vector2(1, cellNeighborCoord[i].y);
+			}
+			if(cellNeighborCoord[i].y == cellsDimensionY + 1){
+				cellNeighborCoord[i] = new Vector2(cellNeighborCoord[i].x, 1);
+			}
+		}
+
+		return cellNeighborCoord;
+	}
+
+	private float[] GetCellNeighborValues(Vector2[] coords, float[,] cells){
+		float[] values = new float[coords.Length];
+
+		for(int i = 0; i < coords.Length; i++){
+			values[i] = cells[(int)coords[i].x, (int)coords[i].y];
+		}
+
+		return values;
 	}
 
 	public float GetCell(int xCoord, int yCoord){
